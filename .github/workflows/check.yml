@@ -1,6 +1,6 @@
 name: CPU Info Collector (All Regions)
 
-#on:
+on:
   workflow_dispatch:
 
 concurrency: 
