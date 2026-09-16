@@ -1,0 +1,7 @@
+on: workflow_dispatch
+jobs:
+  az:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          az account list-locations --query "[].name" -o tsv
