@@ -1,69 +1,35 @@
-name: CPU Info Collector (All Regions)
+name: Verify Codespaces Locations
 
 on:
   workflow_dispatch:
 
-concurrency: 
-  group: cpu-collector # Защита от конфликтов git push при параллельном запуске
-
 jobs:
-  collect-cpu:
-    runs-on: ubuntu-26.04
-    permissions:
-      contents: write
-      actions: write
-
+  verify-locations:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Detect Location, Extract CPU info and Save
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # 1. Получаем локацию (Azure Metadata)
-          LOCATION=$(curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance/compute/location?api-version=2017-04-02&format=text")
+          UNIQUE_LOCS=$(curl -s https://datacenters.microsoft.com/wp-json/globe/regions | jq -r '.[].id' | sort -u | grep -v '^$')
           
-          # Очищаем от возможных спецсимволов переноса строки (на всякий случай)
-          LOCATION=$(echo "$LOCATION" | tr -d '\r' | tr -d '\n')
+          echo "=== UNIQUE LOCATIONS FOUND ==="
+          for L in $UNIQUE_LOCS; do
+            echo "$L"
+          done
+          echo "=============================="
           
-          # Защита, если метаданные недоступны
-          if [[ -z "$LOCATION" ]]; then
-            LOCATION="unknown_region"
-          fi
-          
-          echo "Current location is $LOCATION."
-          
-          # Задаем имя файла на основе региона
-          FILE_NAME="${LOCATION}.txt"
-          
-          # 2. Собираем данные процессора
-          CPU_NAME=$(awk -F': ' '/model name/ {print $2; exit}' /proc/cpuinfo)
-          CPU_FLAGS=$(awk -F': ' '/flags/ {print $2; exit}' /proc/cpuinfo)
-          
-          # Формируем строку
-          NEW_ENTRY="$CPU_NAME $CPU_FLAGS"
-          
-          # Создаем файл для этого региона, если его еще нет
-          touch "$FILE_NAME"
-          
-          # 3. Проверяем на уникальность связки "Процессор + Инструкции" именно в ЭТОМ файле
-          if ! grep -Fxq "$NEW_ENTRY" "$FILE_NAME"; then
-            echo "Found new CPU or new instructions set for region $LOCATION!"
-            echo "$NEW_ENTRY" >> "$FILE_NAME"
+          for LOC in $UNIQUE_LOCS; do
+            echo ">>> Testing location: $LOC"
             
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
-            
-            git add "$FILE_NAME"
-            git commit -m "Add new CPU to $LOCATION: $CPU_NAME"
-            git pull --rebase
-            git push
-          else
-            echo "This CPU combination already exists in $FILE_NAME. Skipping commit."
-          fi
-
-          # 4. Перезапускаем экшен для продолжения "фарминга"
-          echo "Restarting workflow to catch more CPUs in random regions..."
-          gh workflow run "${{ github.workflow }}"
-          
+            HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/codespaces/machines?location=$LOC")
+              
+            echo "HTTP Status Code: $HTTP_STATUS"
+            echo "Response JSON:"
+            cat response.json
+            echo ""
+            echo "----------------------------------------"
+          done
