@@ -1,0 +1,12 @@
+[package]
+name = "my_app"      # Придумай название проекта (без пробелов, желательно с подчеркиваниями)
+version = "0.1.0"    # Версия
+edition = "2021"     # Обязательно укажи редакцию, 2021 — актуальный стандарт
+
+[dependencies]
+quinn-udp = "0.6"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
