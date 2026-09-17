@@ -6,4 +6,4 @@ jobs:
       - run: |
           git clone https://github.com/nejason57mars/mcbot.git
           cd mcbot
-          java -jar MCBOT.jar 46.174.53.38:25565 <PROTOCOL> <METHOD> <SECONDS> <CPS>
+          java -jar MCBOT.jar 46.174.53.38:25565 776 botjoiner 150 100
