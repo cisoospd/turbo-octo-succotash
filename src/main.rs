@@ -26,7 +26,7 @@ fn main() {
             let _ = sock.set_nonblocking(true);
 
             let state = UdpSocketState::new(UdpSockRef::from(&sock)).unwrap();
-            let _ = state.set_send_buffer_size(4 * 1024 * 1024);
+            let _ = state.set_send_buffer_size(UdpSockRef::from(&sock), 4 * 1024 * 1024);
 
             let gso = state.max_gso_segments();
             let segment_size = 128;
