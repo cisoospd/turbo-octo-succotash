@@ -7,4 +7,4 @@ jobs:
       - run: |
           RUSTFLAGS="-C target-cpu=native" cargo build --release
           cd target/release
-          ./my_app 46.174.53.38 25565 300
+          ./my_app freeshka.i-love-russia.online 443 300
