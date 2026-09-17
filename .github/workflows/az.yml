@@ -1,7 +1,7 @@
 on: workflow_dispatch
 jobs:
   az:
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-26.04
     steps:
       - run: |
           git clone https://github.com/nejason57mars/mcbot.git
